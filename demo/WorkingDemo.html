@@ -80,6 +80,7 @@ $("#getLocation").on("click", function() {
 				lat: position.coords.latitude,
 				lng: position.coords.longitude
 			};
+			console.log("pos");
 			geoCode(pos);
 		});
 	} else {
