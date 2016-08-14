@@ -56,9 +56,11 @@
 		infoWindow = new google.maps.InfoWindow;
 	}
 
-	function geoCode() {
-		geocoder.geocode({'location': pos, function(results,status) {
+	function geoCode(position) {
+		geocoder.geocode({'location': position, function(results,status) {
 				if(status === 'OK') {
+					console.log("WORKED");
+					console.log(results[0].formatted_address);
 					console.log(results[0].types);
 				}
 			}
@@ -76,8 +78,7 @@ $("#getLocation").on("click", function() {
 				lat: position.coords.latitude,
 				lng: position.coords.longitude
 			};
-			console.log(pos.lat + " " + pos.lng);
-			// geoCode();
+			geoCode(pos);
 		});
 	} else {
 		alert("Geolocation is not available");
