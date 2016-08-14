@@ -60,13 +60,11 @@
 		geocoder.geocode({'location': position}, function(results,status) {
 			if(status === 'OK') {
 				console.log("WORKED");
-				for (var i = 0; i < results.length; i++) {
-					console.log(results[0].formatted_address);
-					var addressSplit = results[0].formatted_address.split(", ");
-					var city = addressSplit[1];
-					document.getElementById('cityInput').value = city;
-					console.log(city);
-				}
+				console.log(results[0].formatted_address);
+				var addressSplit = results[0].formatted_address.split(", ");
+				var city = addressSplit[1];
+				document.getElementById('cityInput').value = city;
+				console.log(city);
 			}
 		});
 	}
@@ -132,7 +130,7 @@ function ajaxCall() {
 	    	'limit': '10',
 	    	'q[activities_activity_type_name_eq]': activity,
 	    	// 'q[activities_activity_type_name_eq]': 'camping',
-	    	'q[city_cont]': 'Orlando',
+	    	'q[city_cont]': cityInput.value,
 	    	'radius': '100',
 	    }, // Additional parameters here
 	    dataType: 'json',
