@@ -75,12 +75,13 @@ var markers = [];
 $("#getLocation").on("click", function() {
 	alert("clicked");
 	if ("geolocation" in navigator) {
+		console.log("OK");
 		navigator.geolocation.getCurrentPosition(function(position){
 			pos = {
 				lat: position.coords.latitude,
 				lng: position.coords.longitude
 			};
-			console.log("pos");
+			console.log("POS");
 			geoCode(pos);
 		});
 	} else {
