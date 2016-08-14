@@ -1,14 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+	<title>RPS GAME</title>
 
 	<link rel="stylesheet" type="text/css" href="assets/css/reset.css">
 	<link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="assets/css/style.css">
 </head>
 <body>
 
+<div class="container">
+
+	<div class="row header text-center">
+		<form>
+			<input type="text" id="name" name="name" placeholder="Enter name">
+			<input type="submit" id="name_submit">
+		</form>
+	</div>
+	<div class="row game">
+		<div id="player1column" class="column col-xs-4"></div>
+		<div id="center_column" class="column col-xs-4"></div>
+		<div id="player2column" class="column col-xs-4"></div>	
+	</div>
+	
+	<div class="row chat text-center">
+		<form>
+			<textarea id="chat_display"></textarea><br>
+			<input type="text" id="message">
+			<input type="submit" id="chat_submit" disabled=true>
+		</form>
+	</div>
+</div>
+
 <script type="text/javascript" src="assets/javascript/jquery-2.2.4.min.js"></script>
 <script type="text/javascript" src="assets/javascript/bootstrap.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/3.2.1/firebase.js"></script>
+<script src="assets/javascript/main.js"></script>
 </body>
 </html>

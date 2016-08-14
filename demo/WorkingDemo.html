@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Working Project Demo</title>
+	<style>
+		#map {
+			width: 500px;
+			height: 500px;
+		}
+	</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="info"></div>
+<div id="searchDiv">
+	<button id="getLocation">Get Current Location</button>
+	<input type="text" id="cityInput" placeholder="city"><br>
+	<label>Activities</label><br>
+	<label><input id="hiking" type="checkbox" value="hiking">Hiking</label><br>
+	<label><input id="mountainBiking" type="checkbox" value="mountain biking">Mountain Biking</label><br>
+	<label><input id="camping" type="checkbox" value="camping">Camping</label><br>
+	<input type="submit" id="submit">
+</div>
+<script type="text/javascript" src="jquery-2.2.4.min.js">
+</script>
+
+<script type="text/javascript">
+	function initialize() {
+		mapDiv = document.getElementById('map');
+		map = new google.maps.Map(mapDiv, {
+			zoom: 6,
+			center: new google.maps.LatLng(2.8, -187.3),
+			mapTypeId: 'satellite',
+			mapTypeControl: true,
+			mapTypeControlOptions: {
+				position: google.maps.ControlPosition.TOP_LEFT
+			},
+			fullscreenControl: true,
+			fullscreenControlOptions: {
+				position: google.maps.ControlPosition.LEFT_TOP
+			},
+			scaleControl: true,
+			scaleControlOptions: {
+				position: google.maps.ControlPosition.LEFT_TOP
+			},
+			streetViewControl: true,
+			streetViewControlOptions: {
+				position: google.maps.ControlPosition.LEFT_TOP 
+			},
+			zoomControl: true,
+			zoomControlOptions: {
+				position: google.maps.ControlPosition.LEFT_TOP
+			}
+		});
+		var geocoder = new google.maps.Geocoder;
+		
+	}
+
+	function geoCode() {
+		geocoder.geocode({'location': pos, function(results,status) {
+				if(status === 'OK') {
+					console.log(results[].types);
+				}
+			}
+		});
+	}
+</script>
+<script type="text/javascript">
+var num = 0;
+
+$("#getLocation").on("click", function() {
+	alert("clicked");
+	if ("geolocation" in navigator) {
+		navigator.geolocation.getCurrentPosition(function(position){
+			pos = {
+				lat: position.coords.latitude,
+				lng: position.coords.longitude
+			};
+			geoCode();
+		});
+	} else {
+		alert("Geolocation is not available");
+	}
+	
+})
+
+$("#submit").on("click", function() {
+	var cityInput = document.getElementById('cityInput');
+	var hiking = document.getElementById('hiking');
+	var mountainBiking = document.getElementById('mountainBiking');
+	var camping = document.getElementById('camping');
+
+	activities = [hiking, moutainBiking, camping];
+	refinedActivities = [];
+	resultsArray = [];
+
+	for(var i = 0; i < activities.length; i++) {
+		if (activities[i].checked) {
+			refinedActivities.push(activities[i].value);
+		}
+	}
+
+	
+
+	
+
+	if (refinedActivities !== 0) {
+		for(var i = 0; i < refinedActivities.length; i++) {
+			activity = refinedActivities[i];
+			ajaxCall();
+		}
+	} else {
+		activity = "";
+		ajaxCall();
+	}
+	
+});
+
+function ajaxCall() {
+	url = 'https://trailapi-trailapi.p.mashape.com/';
+		// url += '=Denver&radius=100';
+	$.ajax({
+	    url: url, // The URL to the API. You can get this in the API page of the API you intend to consume
+	    type: 'GET', // The HTTP Method, can be GET POST PUT DELETE etc
+	    data: { 
+	    	'limit': '10',
+	    	'q[activities_activity_type_name_eq]': activity,
+	    	// 'q[activities_activity_type_name_eq]': 'camping',
+	    	'q[city_cont]': 'Orlando',
+	    	'radius': '100',
+	    }, // Additional parameters here
+	    dataType: 'json',
+	    success: function(data) { console.dir((data.source)); },
+	    error: function(err) { alert(err); },
+	    beforeSend: function(xhr) {
+	    xhr.setRequestHeader("X-Mashape-Authorization", "mg4EqmXnICmshsFsAWy79q1hLGmsp1TcQQfjsnKMhUENjpu2yC"); // Enter here your Mashape key
+	    }
+	}).done(function(result) {
+		console.log(JSON.stringify(result));
+		if (refinedActivities.length == 1) {
+			console.log("Thats it");
+		} else {
+			resultsArray.push(result.places);
+			num++;
+			console.log("second");
+			if (num >= refinedActivities.length) {
+				console.log("first");
+				compareObjects(refinedActivities.length);
+				num = 0;
+			}
+		}
+		
+		
+		// $("#info").append(JSON.stringify(result.places));
+		// for (var i = 0; i < result.places.length; i++) {
+		// 	var lat = result.places[i].lat;
+		// 	var lon = result.places[i].lon;
+
+		// 	if (lat !== 0 && lon !== 0) {
+		// 		var latLon = new google.maps.LatLng(lat, lon);
+		// 		var marker = new google.maps.Marker({
+		// 			position: latLon,
+		// 			map: map,
+		// 			clickableIcons: true
+		// 		});
+		// 	}
+			
+		// 	console.log(lat + " " + lon);
+		// 	if(result.places[0])
+		// 		map.setCenter(latLon);
+		// }
+		
+	});
+}
+
+function compareObjects(length) {
+	var newNum = 0;
+	var tempArray = [];
+	console.log("resultsArray: " + resultsArray);
+	var inception = resultsArray.shift();
+	while(newNum <= length-2) {
+		console.log("looping");
+		function toggle() {
+			inception = tempArray;
+			tempArray = [];
+		}
+		console.log("inception: " + inception);
+		for (var i = 0; i < inception.length; i++) {
+			for (var j = 0; j < resultsArray[newNum].length; j++) {
+				if (inception[i].name == resultsArray[newNum][j].name) {
+					console.log("Match");
+					tempArray.push(inception[i].name);
+					console.log("tempArray: " + tempArray);
+				}
+			}
+		}
+
+		if (newNum <= length-2 && tempArray.length == 0)
+			console.log("The end, tempArray is empty: " + tempArray);
+		
+		newNum++;
+		toggle();
+	}
+	
+
+	// first pop first array and remove from list with .shift()
+	// then .filter() that first array, where v is the value
+	// then use every to search other arrays for indexOf,
+	// return true if they exist, return false if not
+
+
+}
+	
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAFokhKsz6CwYGYBmYGqWfGLs4AzphT0Lg&callback=initialize"
+    async defer></script>
+</body>
+</html>
