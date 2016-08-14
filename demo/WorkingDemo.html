@@ -57,12 +57,11 @@
 	}
 
 	function geoCode(position) {
-		geocoder.geocode({'location': position, function(results,status) {
-				if(status === 'OK') {
-					console.log("WORKED");
-					console.log(results[0].formatted_address);
-					console.log(results[0].types);
-				}
+		geocoder.geocode({'location': position}, function(results,status) {
+			if(status === 'OK') {
+				console.log("WORKED");
+				console.log(results[0].formatted_address);
+				console.log(results[0].types);
 			}
 		});
 	}
