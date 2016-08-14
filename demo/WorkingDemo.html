@@ -71,7 +71,7 @@
 </script>
 <script type="text/javascript">
 var num = 0;
-
+var markers = [];
 $("#getLocation").on("click", function() {
 	alert("clicked");
 	if ("geolocation" in navigator) {
@@ -103,10 +103,6 @@ $("#submit").on("click", function() {
 			refinedActivities.push(activities[i].value);
 		}
 	}
-
-	
-
-	
 
 	if (refinedActivities.length !== 0) {
 		for(var i = 0; i < refinedActivities.length; i++) {
@@ -142,40 +138,63 @@ function ajaxCall() {
 	    }
 	}).done(function(result) {
 		console.log(JSON.stringify(result));
-		if (refinedActivities.length == 1) {
+		if (refinedActivities.length <= 1) {
 			console.log("Thats it");
+			setMarkers(result.places);
 		} else {
 			resultsArray.push(result.places);
 			num++;
 			console.log("second");
 			if (num >= refinedActivities.length) {
 				console.log("first");
-				compareObjects(refinedActivities.length);
+				setMarkers(compareObjects(refinedActivities.length));
 				num = 0;
 			}
 		}
-		
-		
-		// $("#info").append(JSON.stringify(result.places));
-		// for (var i = 0; i < result.places.length; i++) {
-		// 	var lat = result.places[i].lat;
-		// 	var lon = result.places[i].lon;
-
-		// 	if (lat !== 0 && lon !== 0) {
-		// 		var latLon = new google.maps.LatLng(lat, lon);
-		// 		var marker = new google.maps.Marker({
-		// 			position: latLon,
-		// 			map: map,
-		// 			clickableIcons: true
-		// 		});
-		// 	}
-			
-		// 	console.log(lat + " " + lon);
-		// 	if(result.places[0])
-		// 		map.setCenter(latLon);
-		// }
-		
 	});
+}
+
+function setMarkers(places) {
+	// Sets the map on all markers in the array.
+	console.log(places);
+	function setMapOnAll(map) {
+		for (var i = 0; i < markers.length; i++) {
+		    markers[i].setMap(map);
+		  }
+	}
+
+	// Removes the markers from the map, but keeps them in the array.
+	function clearMarkers() {
+	  setMapOnAll(null);
+	}
+
+	// Deletes all markers in the array by removing references to them.
+	function deleteMarkers() {
+	  clearMarkers();
+	  markers = [];
+	}
+	
+	deleteMarkers();
+
+	// $("#info").append(JSON.stringify(result.places));
+	for (var i = 0; i < places.length; i++) {
+		var lat = places[i].lat;
+		var lon = places[i].lon;
+
+		if (lat !== 0 && lon !== 0) {
+			var latLon = new google.maps.LatLng(lat, lon);
+			var marker = new google.maps.Marker({
+				position: latLon,
+				map: map,
+				clickableIcons: true
+			});
+			markers.push(marker);
+		}
+		
+		console.log(lat + " " + lon);
+		if(places[0])
+			map.setCenter(latLon);
+	}
 }
 
 function compareObjects(length) {
@@ -194,7 +213,7 @@ function compareObjects(length) {
 			for (var j = 0; j < resultsArray[newNum].length; j++) {
 				if (inception[i].name == resultsArray[newNum][j].name) {
 					console.log("Match");
-					tempArray.push(inception[i].name);
+					tempArray.push(inception[i]);
 					console.log("tempArray: " + tempArray);
 				}
 			}
@@ -202,7 +221,11 @@ function compareObjects(length) {
 
 		if (newNum <= length-2 && tempArray.length == 0)
 			console.log("The end, tempArray is empty: " + tempArray);
-		
+		if (newNum >= length-2) {
+			console.log("FINAL" + tempArray);
+			return tempArray;
+		}
+			
 		newNum++;
 		toggle();
 	}
