@@ -59,7 +59,7 @@
 	function geoCode() {
 		geocoder.geocode({'location': pos, function(results,status) {
 				if(status === 'OK') {
-					console.log(results[].types);
+					console.log(results[0].types);
 				}
 			}
 		});
