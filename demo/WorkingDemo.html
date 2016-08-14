@@ -83,7 +83,9 @@ $("#getLocation").on("click", function() {
 			};
 			console.log("POS");
 			geoCode(pos);
-		});
+		}, function(error) {
+			console.log("There was an error " + error);
+		}, {timeout: 10000});
 	} else {
 		alert("Geolocation is not available");
 	}
