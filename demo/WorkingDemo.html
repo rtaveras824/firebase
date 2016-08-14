@@ -61,8 +61,11 @@
 			if(status === 'OK') {
 				console.log("WORKED");
 				for (var i = 0; i < results.length; i++) {
-					console.log(results[i].formatted_address);
-					console.log(results[i].types);
+					console.log(results[0].formatted_address);
+					var addressSplit = results[0].split(", ");
+					var city = addressSplit[1];
+					document.getElementById('cityInput').value = city;
+					console.log(city);
 				}
 			}
 		});
