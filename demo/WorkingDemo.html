@@ -94,7 +94,7 @@ $("#submit").on("click", function() {
 	var mountainBiking = document.getElementById('mountainBiking');
 	var camping = document.getElementById('camping');
 
-	activities = [hiking, moutainBiking, camping];
+	activities = [hiking, mountainBiking, camping];
 	refinedActivities = [];
 	resultsArray = [];
 
@@ -108,13 +108,14 @@ $("#submit").on("click", function() {
 
 	
 
-	if (refinedActivities !== 0) {
+	if (refinedActivities.length !== 0) {
 		for(var i = 0; i < refinedActivities.length; i++) {
 			activity = refinedActivities[i];
 			ajaxCall();
 		}
 	} else {
 		activity = "";
+		console.log("Is equal to zero.");
 		ajaxCall();
 	}
 	
