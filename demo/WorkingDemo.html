@@ -62,7 +62,7 @@
 				console.log("WORKED");
 				for (var i = 0; i < results.length; i++) {
 					console.log(results[0].formatted_address);
-					var addressSplit = results[0].split(", ");
+					var addressSplit = results[0].formatted_address.split(", ");
 					var city = addressSplit[1];
 					document.getElementById('cityInput').value = city;
 					console.log(city);
