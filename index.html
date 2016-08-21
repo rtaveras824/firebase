@@ -12,22 +12,28 @@
 <div class="container">
 
 	<div class="row header text-center">
-		<form>
-			<input type="text" id="name" name="name" placeholder="Enter name">
-			<input type="submit" id="name_submit">
+		<form class="form-inline">
+			<input class="form-control" type="text" id="name" name="name" placeholder="Enter name">
+			<input class="form-control" type="submit" id="name_submit">
 		</form>
 	</div>
 	<div class="row game">
-		<div id="player1column" class="column col-xs-4"></div>
-		<div id="center_column" class="column col-xs-4"></div>
-		<div id="player2column" class="column col-xs-4"></div>	
+		<div class="outer col-xs-4"><div id="player1_column" class="column"></div></div>
+		<div class="outer col-xs-4"><div id="center_column" class="column"></div></div>
+		<div class="outer col-xs-4"><div id="player2_column" class="column"></div></div>	
 	</div>
 	
 	<div class="row chat text-center">
-		<form>
-			<textarea id="chat_display"></textarea><br>
-			<input type="text" id="message">
-			<input type="submit" id="chat_submit" disabled=true>
+		<form class="form-group row messagebox">
+			<div class="col-xs-12">
+				<textarea id="chat_display"></textarea><br>
+			</div>
+			<div class="col-xs-10">
+				<input class="form-control col-xs-10" type="text" id="message">
+			</div>
+			<div class="col-xs-2">
+				<input class="form-control col-xs-2" type="submit" id="chat_submit" disabled=true>
+			</div>
 		</form>
 	</div>
 </div>

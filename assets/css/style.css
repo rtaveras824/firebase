@@ -1,16 +1,58 @@
 html, body {
 	width: 100%;
 	height: 100%;
+	background: black;
+}
 
+.row {
+	padding: 10px 0;
 }
 
 .game {
-	width: 100%;
 	height: 400px;
 }
 
-.column {
-	border: 1px solid black;
+.outer {
 	height: 100%;
+}
+
+.column {
+	width: 100%;
+	height: 100%;
+	border-radius: 20px;
+	padding-bottom: 10px;
+}
+
+.col-xs-4:not(:first-child,:last-child) {
+	padding-right:2px;
+	padding-left:2px;
+}
+
+#player1_column {
+	background: #FF530D;
+	border: 5px solid #DB1E13;
+}
+
+#player2_column {
+	background: #FF0000;
+	border: 5px solid #DB1E13;
+}
+
+#center_column {
+	background: #E82C0C;
+	border: 5px solid #DB1E13;
+}
+
+#chat_display {
+	width: 100%;
+	height: 200px;
+	padding: 10px;
+	border: 5px solid #E80C7A;
+	background: #FFB7FF;
+	border-radius: 10px;
+	resize: none;
+}
+
+.messagebox {
 	padding: 10px;
 }
