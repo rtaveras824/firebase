@@ -1,3 +1,8 @@
+//Enter both players
+//in console do rps.gameLogic('rock', 'paper')
+//game works, just needed to figure out how to display the information
+//differently for each player
+
 // Initialize Firebase
 var config = {
 	apiKey: "AIzaSyAzmJGpa-Fp2Z4cO3f26TSknz3vhqNVDxM",
@@ -21,10 +26,10 @@ function RPS() {
 	
 	//Used for gameLogic
 	this.choices = ['rock', 'paper', 'scissors'];
-	this.choice1 = '';
-	this.choice1state = false;
-	this.choice2 = '';
-	this.choice2state = false;
+	this.player1Choice = '';
+	this.player1ChoiceState = false;
+	this.player2Choice = '';
+	this.player2ChoiceState = false;
 
 	//Saves message on form submit
 	this.chatSubmit.addEventListener('click', this.saveMessage.bind(this));
@@ -59,19 +64,20 @@ function RPS() {
 
 	//Use players ref for record of each player
 	this.playersRef = this.database.ref("/players");
-	this.other_player_ref = this.database.ref("/players/" + this.other_player_num);
+	
 	this.playersRef.on("value", function(snapshot) {
 		console.log('player set num for getting wins and losses: ' + this.player_set_num);
 		//check if player 1 or 2 exist
-		this.player1set = snapshot.child('1').exists();
-		this.player2set = snapshot.child('2').exists();
-
-		
+		this.player1ref = snapshot.child('1');
+		this.player2ref = snapshot.child('2');
+		this.player1set = this.player1ref.exists();
+		this.player2set = this.player2ref.exists();
 
 		this.current_player_ref = snapshot.child(this.player_set_num);
 		this.opponent_player_ref = snapshot.child(this.other_player_num);
 		//Set name, wins, losses, and ties from database
 		this.name = this.current_player_ref.child('name').val();
+		this.player1Choice = this.current_player_ref.child('choice').val();
 		this.wins = this.current_player_ref.child('wins').val();
 		this.losses = this.current_player_ref.child('losses').val();
 		this.ties = this.current_player_ref.child('ties').val();
@@ -79,13 +85,41 @@ function RPS() {
 
 		//Set opponent name, wins, losses, and ties from database
 		this.other_player_name = this.opponent_player_ref.child('name').val();
+		this.player2Choice = this.opponent_player_ref.child('choice').val();
 		this.player2wins = this.opponent_player_ref.child('wins').val();
 		this.player2losses = this.opponent_player_ref.child('losses').val();
 		this.player2ties = this.opponent_player_ref.child('ties').val();
 		console.log(this.other_player_name + ' record: wins-' + this.player2wins + ' losses-' + this.player2losses + ' ties-' + this.player2ties);
+	
+		var player1col = document.getElementById('player1_column');
+		var player2col = document.getElementById('player2_column');
 
 		if (this.player1set && this.player2set) {
-			this.display();
+			console.log("Player 1 and Player 2 set.");
+			player1col.innerHTML = snapshot.child('1').child('name').val();
+			player2col.innerHTML = snapshot.child('2').child('name').val();
+			if (!this.player1ChoiceState) {
+				if(this.player_set_num === 1) {
+					this.createBtns(player1col);
+				}
+			} else if (!this.player2ChoiceState) {
+				if(this.player_set_num === 2) {
+					this.createBtns(player2col);
+				}
+			}
+		} else if (!this.player1set || !this.player2set) {
+			console.log("This is working");
+			if (!this.player1set) {
+				$('#player1_column').html('Waiting for Player 1');
+			} else {
+				$('#player1_column').html(snapshot.child(1).child('name').val());
+			}
+
+			if (!this.player2set) {
+				$('#player2_column').html('Waiting for Player 2');
+			} else {
+				$('#player2_column').html(snapshot.child(2).child('name').val());
+			}
 		}
 
 	}.bind(this));
@@ -104,25 +138,27 @@ RPS.prototype.createBtns = function (div) {
 	for (var i = 0; i < this.choices.length; i++) {
 		var btn = document.createElement('button');
 		btn.setAttribute('value', this.choices[i]);
-		btn.innerHTML = this.choices[i];
+		btn.innerHTML = '<br>' + this.choices[i];
+
 		btn.onclick = function(event) {
-			if (this.player_set_num == 1) {
-				this.choice1 = this.getAttribute('value');
-				this.playerRef.update({
-					choice: this.getAttribute('value')
-				}.bind(this));
-				this.choice1state = true;
-			}
-			else {
-				this.choice2 = this.getAttribute('value');
-				this.other_player_ref.update({
-					choice: this.getAttribute('value')
-				}.bind(this));
-				this.choice2state = true;
+			// this.playerRef = this.database.ref("/players/" + this.player_set_num);
+			var attribute = this.getAttribute('value');
+			this.playerRef.set({
+				choice: this.getAttribute('value')
+			}).bind(rps);
+
+			if (this.player_set_num === 1) {
+				this.player1Choice = this.getAttribute('value');
+				this.player1Choicestate = true;
+			} else {
+				this.player2Choice = this.getAttribute('value');
+				this.player2Choicestate = true;
 			}
 				
-			if(this.choice1 && this.choice2) {
-				this.gameLogic(this.choice1, this.choice2);
+			if(this.player1ChoiceState && this.player2ChoiceState) {
+				this.gameLogic(this.player1Choice, this.player2Choice);
+				this.player1ChoiceState = false;
+				this.player2ChoiceState = false;
 			}
 		}
 		div.appendChild(btn);
@@ -160,7 +196,7 @@ RPS.prototype.gameLogic = function(player1, player2) {
 	var player2choice = this.choices.indexOf(player2);
 
 	//Get opponent database reference to update record
-	this.other_player_ref = this.database.ref("/players/" + this.other_player_num);
+	// this.other_player_ref = this.database.ref("/players/" + this.other_player_num);
 
 	//Using choices array, if opponent choice is +1 in array index, then you lose
 	if (player2choice == (player1choice+1)%this.choices.length) {
@@ -205,7 +241,7 @@ RPS.prototype.setUser = function(e) {
 
 	//Get reference of current player
 	if (this.player1set && this.player2set) {
-		console.log("Cannot set up a references. Two at a time.");
+		console.log("Cannot set up a reference. Two at a time.");
 	} else {
 		//If player 1 does not exist, set player as player 1
 		if (!this.player1set) {
@@ -220,9 +256,11 @@ RPS.prototype.setUser = function(e) {
 		//If they entered a name in textfield, initialize record in database
 		if(this.nameInput.value) {
 			this.playerRef = this.database.ref("/players/" + this.player_set_num);
+			this.other_player_ref = this.database.ref("/players/" + this.other_player_num);
 			//When the current player record initializes in database, set name for chat box
 			this.playerRef.set({
 				name: this.nameInput.value,
+				choice: '',
 				wins: 0,
 				losses: 0,
 				ties: 0
