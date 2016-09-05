@@ -78,6 +78,7 @@ function RPS() {
 		//Set name, wins, losses, and ties from database
 		this.name = this.current_player_ref.child('name').val();
 		this.player1Choice = this.current_player_ref.child('choice').val();
+		this.player1ChoiceState = this.player1ref.child('choiceState').val();
 		this.wins = this.current_player_ref.child('wins').val();
 		this.losses = this.current_player_ref.child('losses').val();
 		this.ties = this.current_player_ref.child('ties').val();
@@ -86,6 +87,7 @@ function RPS() {
 		//Set opponent name, wins, losses, and ties from database
 		this.other_player_name = this.opponent_player_ref.child('name').val();
 		this.player2Choice = this.opponent_player_ref.child('choice').val();
+		this.player2ChoiceState = this.player2ref.child('choiceState').val();
 		this.player2wins = this.opponent_player_ref.child('wins').val();
 		this.player2losses = this.opponent_player_ref.child('losses').val();
 		this.player2ties = this.opponent_player_ref.child('ties').val();
@@ -94,18 +96,36 @@ function RPS() {
 		var player1col = document.getElementById('player1_column');
 		var player2col = document.getElementById('player2_column');
 
+		var self = this;
+
 		if (this.player1set && this.player2set) {
 			console.log("Player 1 and Player 2 set.");
 			player1col.innerHTML = snapshot.child('1').child('name').val();
 			player2col.innerHTML = snapshot.child('2').child('name').val();
-			if (!this.player1ChoiceState) {
-				if(this.player_set_num === 1) {
-					this.createBtns(player1col);
+			if(this.player1ChoiceState && this.player2ChoiceState) {
+				console.log("WORK");
+				player1col.innerHTML += "Picked " + this.player1Choice;
+				player2col.innerHTML += "Picked " + this.player2Choice;
+				// window.setTimeout(function() {
+				// 	self.gameLogic(this.player1Choice, this.player2Choice);
+				// }, 2000);
+			} else {
+				if (!this.player1ChoiceState) {
+					if(this.player_set_num === 1) {
+						this.createBtns(player1col);
+						console.log("Player 1 no choice yet.");
+					}
+				} else {
+					console.log("Player 1 choice.");
 				}
-			} else if (!this.player2ChoiceState) {
-				if(this.player_set_num === 2) {
-					this.createBtns(player2col);
+				if (!this.player2ChoiceState && this.player1ChoiceState) {
+					console.log("Player 2 turn");
+					if(this.player_set_num === 2) {
+						console.log("Create player 2 buttons");
+						this.createBtns(player2col);
+					}
 				}
+				console.log("Something wrong with conditional");
 			}
 		} else if (!this.player1set || !this.player2set) {
 			console.log("This is working");
@@ -135,34 +155,41 @@ function RPS() {
 }
 
 RPS.prototype.createBtns = function (div) {
+	var newDiv = document.createElement('div');
+	newDiv.id = 'choices';
+
 	for (var i = 0; i < this.choices.length; i++) {
 		var btn = document.createElement('button');
 		btn.setAttribute('value', this.choices[i]);
-		btn.innerHTML = '<br>' + this.choices[i];
+		btn.innerHTML = this.choices[i];
+
+		var self = this;
 
 		btn.onclick = function(event) {
 			// this.playerRef = this.database.ref("/players/" + this.player_set_num);
-			var attribute = this.getAttribute('value');
-			this.playerRef.set({
-				choice: this.getAttribute('value')
-			}).bind(rps);
+			// if (self.player_set_num === 1) {
+			// 	self.player1Choice = this.getAttribute('value');
+			// 	self.player1ChoiceState = true;
+			// } else {
+			// 	self.player2Choice = this.getAttribute('value');
+			// 	self.player2ChoiceState = true;
+			// }
 
-			if (this.player_set_num === 1) {
-				this.player1Choice = this.getAttribute('value');
-				this.player1Choicestate = true;
-			} else {
-				this.player2Choice = this.getAttribute('value');
-				this.player2Choicestate = true;
-			}
+			var attribute = this.getAttribute('value');
+			self.playerRef.update({
+				choice: this.getAttribute('value'),
+				choiceState: true
+			});
 				
-			if(this.player1ChoiceState && this.player2ChoiceState) {
-				this.gameLogic(this.player1Choice, this.player2Choice);
-				this.player1ChoiceState = false;
-				this.player2ChoiceState = false;
+			if(self.player1ChoiceState && self.player2ChoiceState) {
+				self.gameLogic(self.player1Choice, self.player2Choice);
+				self.player1ChoiceState = false;
+				self.player2ChoiceState = false;
 			}
 		}
-		div.appendChild(btn);
+		newDiv.appendChild(btn);
 	}
+	div.appendChild(newDiv);
 }
 
 // When no one is signed in, say waiting for players
@@ -192,6 +219,13 @@ RPS.prototype.display = function() {
 
 RPS.prototype.gameLogic = function(player1, player2) {
 	//Rock, paper, scissors
+	this.playerRef.update({
+		choiceState: false
+	});
+	this.other_player_ref.update({
+		choiceState: false
+	});
+
 	var player1choice = this.choices.indexOf(player1);
 	var player2choice = this.choices.indexOf(player2);
 
@@ -204,19 +238,13 @@ RPS.prototype.gameLogic = function(player1, player2) {
 		this.playerRef.update({
 			losses: ++this.losses
 		});
-		other_player_ref.update({
-			wins: ++this.player2wins
-		});
 	} 
 	//Using choices array, if opponent choice is -1 in array index, then you win
-	else if (player2choice == (player1choice-1+this.choices.length)%this.choices.length) {
+	if (player2choice == (player1choice-1+this.choices.length)%this.choices.length) {
 		console.log('reverse modulus math: ' + (player1choice-1+this.choices.length)%this.choices.length);
 		console.log("You win!");
 		this.playerRef.update({
 			wins: ++this.wins
-		});
-		other_player_ref.update({
-			losses: ++this.player2losses
 		});
 	} 
 	//Using choices array, if opponent choice and your choice are ==, then tie
@@ -225,14 +253,12 @@ RPS.prototype.gameLogic = function(player1, player2) {
 		this.playerRef.update({
 			ties: ++this.ties
 		});
-		other_player_ref.update({
-			ties: ++this.player2ties
-		});
 	} 
 	//Crazy outlier event, added this for no reason
 	else {
 		console.log("I don't know what happened");
 	}
+
 }
 
 RPS.prototype.setUser = function(e) {
